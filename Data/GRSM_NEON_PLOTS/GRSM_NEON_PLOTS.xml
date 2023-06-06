@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+    <idinfo>
+        <descript>
+            <abstract>Showing location of DRAFT NEON Sampling Plots in the park. National Ecological Observatory Network (NEON) is a large facility project managed by NEON, Inc. and funded by the National Science Foundation. The National Ecological Observatory Network (NEON) is a proposed continental-scale research platform for discovering and understanding the impacts of climate change, land-use change, and invasive species on ecology. NEON will gather long-term data on ecological responses of the biosphere to changes in land use and climate, and on feedbacks with the geosphere, hydrosphere, and atmosphere.NEON's primary goal is to enable analyses of ecological processes and patterns at regional to continental scales. This requires that measurements and samples be collected using highly standardized methods and instrumentation so that data can be easily compared among sites and scaled up over larger areas.</abstract>
+            <purpose>GRSM_NEON_PLOTS</purpose>
+        </descript>
+        <keywords>
+            <theme>
+                <themekt>None</themekt>
+                <themekey>NEON</themekey>
+                <themekey>Biodiversity</themekey>
+                <themekey>Continuous Monitoring</themekey>
+                <themekey>GRSM</themekey>
+                <themekey>Great</themekey>
+                <themekey>NPS</themekey>
+                <themekey>Natio</themekey>
+                <themekey>SER</themekey>
+                <themekey>AP</themekey>
+                <themekey>Appalachian Highlands Network</themekey>
+            </theme>
+        </keywords>
+        <accconst>None</accconst>
+        <useconst>THE NEON DATA PRODUCTS ARE PROVIDED &amp;quot;AS IS&amp;quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE NEON DATA PRODUCTS BE LIABLE FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE NEON DATA PRODUCTS. - See more at: http://www.neonscience.org/about/terms-of-use/data-usage-and-citation-policies#sthash.7WmVsPaO.dpuf</useconst>
+        <datacred>Great Smoky Mountains National Park, National Ecological Observatory Network. 2015. Data accessed on 3/15/2016. Available on-line  http://data.neoninc.org/ from National Ecological Observatory Network, Boulder, CO, USA</datacred>
+    </idinfo>
+    <metainfo>
+        <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+        <metstdv>FGDC-STD-001-1998</metstdv>
+        <mettc>local time</mettc>
+    </metainfo>
+</metadata>

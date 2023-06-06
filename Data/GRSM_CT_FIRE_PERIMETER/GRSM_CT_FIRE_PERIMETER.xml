@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+    <idinfo>
+        <descript>
+            <abstract>FIMT is an ArcMap extension developed by the Esri–Denver Professional Services Group that provides all the tools necessary to manage GIS fire incident data using a standardized geodatabase model and map symbology for fire incident mapping. Beginning with the 2005 fire season, FIMT will be the U.S. federal standard GIS application for fire incident mapping. FIMT is based on the Incident Command System (ICS). This method of managing fire incidents was developed for incident response in the United States, and it has been imitated by emergency response organizations around the world. The terminology, processes, and symbols used in the FIMT application have been developed and used by many organizations to standardize the creation of maps used to support a fire incident command. With the adoption of the National Incident Management System (NIMS), the Department of Homeland Security has established ICS as the standard method of incident management organization. FIMT consists of an ArcMap toolbar that furnishes fire GIS technical specialists (GISTs) with all the ArcMap tools they need to manage the GIS data required to produce maps that support a fire incident. As part of FIMT, a standardized geodatabase model was developed for storing fire incident features. This standardized model provides a consistent framework for all fire GIS personnel using FIMT tools. The geodatabase is created by FIMT from a stored database template that is installed with the application. The geodatabase streamlines uploading and processing of fire perimeter information </abstract>
+            <purpose>GRSM_CT_FIRE_PERIMETER</purpose>
+        </descript>
+        <keywords>
+            <theme>
+                <themekt>None</themekt>
+                <themekey>GRSM</themekey>
+                <themekey>Great Smoky Mountains National Park</themekey>
+                <themekey>NPS</themekey>
+                <themekey>National Park Service</themekey>
+                <themekey>Chimney Tops 2 Fire</themekey>
+                <themekey>Chimney Tops 2 Fire</themekey>
+                <themekey>Cobbly Nob Fire</themekey>
+            </theme>
+        </keywords>
+        <accconst>None</accconst>
+        <useconst>These data represent a point in time during the incident and do not reflect the status of the fire at the time of displaye. Time has passed since these data have been published and more than likely, the feature "Uncontrolled Fire Edge" no longer exists. The National Park Service shall not be held liable for improper or incorrect use of the data described and/or contained herein. These data and related graphics (i.e. GIF or JPG format files) are not legal documents and are not intended to be used as such. The information contained in these data is dynamic and may change over time. The data are not better than the original sources from which they were derived. It is the responsibility of the data user to use the data appropriately and consistent within the limitations of geospatial data in general and these data in particular. The related graphics are intended to aid the data user in acquiring relevant data; it is not appropriate to use the related graphics as data. The National Park Service gives no warranty, expressed or implied, as to the accuracy, reliability, or completeness of these data. It is strongly recommended that these data are directly acquired from an NPS server and not indirectly through other sources which may have changed the data in some way. Although these data have been processed successfully on computer systems at the National Park Service, no warranty expressed or implied is made regarding the utility of the data on other systems for general or scientific purposes, nor shall the act of distribution constitute any such warranty. This disclaimer applies both to individual use of the data and aggregate use with other data. </useconst>
+        <datacred>NIFC</datacred>
+    </idinfo>
+    <metainfo>
+        <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+        <metstdv>FGDC-STD-001-1998</metstdv>
+        <mettc>local time</mettc>
+    </metainfo>
+</metadata>
