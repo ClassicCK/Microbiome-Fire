@@ -43,7 +43,7 @@ plots$fire <- c("Unburned", "Unburned", "Burned", "Burned", "Unburned",
                 "Burned", "Burned", "Burned", "Burned")
 
 #Map Fire and Sites
-register_google(key = "AIzaSyAH-z543pUdMSt0scV18kv2-f9oJjpZ204")
+register_google(key = "Place Key Here")
 tn_map <- get_map(location = c(lon = -83.475, lat = 35.70), zoom = 11, maptype = "roadmap")
 
 p <- ggmap(tn_map) +
