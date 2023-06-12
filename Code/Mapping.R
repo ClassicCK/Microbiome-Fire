@@ -8,27 +8,28 @@ library(sf)
 library(basemaps)
 library(gridExtra)
 
-# Load in Fire Perimeter
+# Load in Fire Perimeter from Great Smoky Mountains National Park (previouly downloaded and provided in GitHub repo)
 fire <- sf::st_read(paste0(getwd(),"/data/GRSM_CT_FIRE_PERIMETER/GRSM_CT_FIRE_FIRE_POLYGON.shp"), package = "sf")
 perimeter <- readOGR( 
   dsn = paste0(getwd(),"/data/GRSM_CT_FIRE_PERIMETER/"), 
   layer = "GRSM_CT_FIRE_FIRE_POLYGON",
   verbose = FALSE
 )
-st_crs(perimeter)
-proj4string(perimeter) <- CRS("+init=epsg:26917")
-perimeter <- spTransform(perimeter, CRS("+proj=longlat +datum=NAD83"))
 
-fire <- st_as_sf(perimeter)
+st_crs(perimeter) #Check coordinate reference system
+proj4string(perimeter) <- CRS("+init=epsg:26917") #Project to new CRS
+perimeter <- spTransform(perimeter, CRS("+proj=longlat +datum=NAD83")) #Set CRS
 
-# Load in Plots
+fire <- st_as_sf(perimeter) #Create seperate shapefile set
+
+# Load in Plots from NEON repository (previouly downloaded and provided in GitHub repo)
 plots <- readOGR(
   dsn = paste0(getwd(),"/data/GRSM_NEON_PLOTS/"),
   layer = "IANDM_VEG_DBO_GRSM_NEON_PLOTS",
   verbose = FALSE
 )
 
-#Load in Burn Severity
+#Load in Burn Severity (previouly downloaded and provided in GitHub repo)
 burn <- read.csv(paste0(getwd(),"/data/GRSM_CT_FIRE_SOIL_BURN_SEVERITY.csv"))
 
 #Subset to plots of interest
@@ -43,8 +44,8 @@ plots$fire <- c("Unburned", "Unburned", "Burned", "Burned", "Unburned",
                 "Burned", "Burned", "Burned", "Burned")
 
 #Map Fire and Sites
-register_google(key = "Place Key Here")
-tn_map <- get_map(location = c(lon = -83.475, lat = 35.70), zoom = 11, maptype = "roadmap")
+register_google(key = "Place Key Here") #Will need Google API to run
+tn_map <- get_map(location = c(lon = -83.475, lat = 35.70), zoom = 11, maptype = "roadmap") #Set bounding frame to state of Tennessee
 
 p <- ggmap(tn_map) +
   geom_sf(data = fire, fill = "red", color="red", inherit.aes = FALSE, alpha = 0.2) +
@@ -53,12 +54,13 @@ p <- ggmap(tn_map) +
                                  "#FB4F14", "#FB4F14"), inherit.aes = FALSE) +
   theme_cowplot()
 
-ggsave(filename= "/Users/christopher/Library/Mobile Documents/com~apple~CloudDocs/Documents/Duke/GRSM_Biome/Manuscript/Figure1A.pdf", 
+#Save Plot
+ggsave(filename= paste0(getwd(), "/Figures/Figure1A.pdf"), 
        plot = p, width = 180, height = 180, units=c("mm"), dpi=600) 
 
-# Try to create call out later
-q <- ggplot() +
-  borders(database = "state", reg = "tennessee") + 
-  geom_rect(xmin = -83.7, xmax = -83.2, ymin = 35.5, ymax = 35.9, 
-                                      fill = NA, colour = "black", size = 1.5) +
-  theme_cowplot()
+# # Try to create call out later
+# q <- ggplot() +
+#   borders(database = "state", reg = "tennessee") + 
+#   geom_rect(xmin = -83.7, xmax = -83.2, ymin = 35.5, ymax = 35.9, 
+#                                       fill = NA, colour = "black", size = 1.5) +
+#   theme_cowplot()

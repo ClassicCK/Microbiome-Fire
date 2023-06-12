@@ -879,13 +879,73 @@ xtable(unburned.data, type = "latex", file = paste0(getwd(), "/Tables/unburnedch
 
 
 
-## Supplementary Figures
+## Supplementary Figures (microViz and Rocca Paper)
 
 # Normality
 
+# Beta Diversity PERMANOVA
+pn <- ps.weighted %>%
+  tax_agg("Genus") %>%
+  dist_calc("bray") %>%
+  dist_permanova(
+    seed = 1,
+    variables = c("pH","Fire", "Fall", "Spring", "Summer"),
+    n_processes = 1,
+    n_perms = 99)
+    
+print(pn)
+
 # Heatmap
+# Correlation Heatmap
+cor_heatmap(ps.phylum)
+
+# Composition Heatmap
+comp <- comp_heatmap(ps.phylum,  sample_anno = sampleAnnotation(
+  Site = anno_sample_cat("plotID.x", legend_title = "Site"),
+  `Burn Status` = anno_sample_cat("fire", legend_title = "Burn Status"),
+  Time = anno_sample_cat("Time", legend_title = "Time")
+))
+
+pdf(file = paste0(getwd(),"/Figures/FigureSCompHeatmap.pdf"))
+comp.heatmap <- ComplexHeatmap::draw(
+  object = comp,
+  annotation_legend_list = attr(comp, "AnnoLegends"), merge_legends = TRUE)
+dev.off()
 
 # Beta-dispersion
+# Reuse ps.weighted, with Fire, Summer, Fall, and Spring set as factors
+ps.weighted@sam_data$Fire <- as.factor(ps.weighted@sam_data$Fire)
+ps.weighted@sam_data$Fall <- as.factor(ps.weighted@sam_data$Fall)
+ps.weighted@sam_data$Spring <- as.factor(ps.weighted@sam_data$Spring)
+ps.weighted@sam_data$Summer <- as.factor(ps.weighted@sam_data$Summer)
 
+bd <- ps.weighted %>%
+  tax_agg("Genus") %>%
+  dist_calc("bray") %>%
+  dist_bdisp(variables = c("Fire", "Fall", "Spring", "Summer")) %>%
+  bdisp_get()
+
+print(bd)
 # Iris Plot
+# Use Phyla Clade as Grouping
+# Filter to opnly post-burn plots
+ord <- ps.taxa %>%
+  subset_samples(fire == "Burned") %>%
+  tax_fix(unknowns = c("Bacteria Candidate Group", "CCD", "CMS", "FCB", "Gracilicutes", "PANNAM", "PVC", "Terrabacteria")) %>%
+  tax_agg("Phylum") %>%
+  dist_calc("bray") %>%
+  ord_calc(method = "PCoA")
+
+op <- ord_plot_iris(
+  data = ord,
+  n_taxa = 32,
+  tax_level = "Phylum",
+  anno_colour = "Time",
+  anno_colour_style = list(size = 3)) +
+  scale_fill_manual(values=(mycolors), name="Phylum")
+
+ggsave(filename= paste0(getwd(),"/Figures/FigureS3.pdf"), 
+       plot = op, width = 180, height = 240, units=c("mm"), dpi=600) 
+
+# PhyloD
 
