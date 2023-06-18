@@ -17,6 +17,9 @@ library(pals)# Data visualization
 library(indicspecies) # Indicator Species Analysis Package
 library(ggtree)# Data visualization
 library(xtable)# Save table as LateX
+library(caper)# phyloD analysis
+library(betapart)# measure species turnover
+library(QsRutils)# Root Phylogenetic Tree
 
 # Load in previosuly generated phyloseq object (01_Process_16S.R)
 list.files(.libPaths()[1])  %>%
@@ -200,11 +203,15 @@ pre.test.shannon <- wilcox.test(x = un$Shannon, y = b$Shannon,
 print(pre.test.obs)
 summary(pre.test.obs)
 
-print(pre.test.shannon )
+print(pre.test.shannon)
 summary(pre.test.shannon)
 
-# PERMANOVA???????
+# ANOVA
+div.aov <- anova_test(Observed ~ soilTemp + soilInCaClpH + Time + sampleTiming,
+  data = alpha.burned)
 
+shan.aov <- anova_test(Shannon ~ soilTemp + soilInCaClpH + Time + sampleTiming,
+  data = alpha.burned)
 
 # Figure 2. Boxplot of Pre- and Post- Burn in Burned and Unburned plots for 
 # total (A) ASV richness (alpha diversity) and (B) Shannon Diversity. Panels 
@@ -359,6 +366,18 @@ ps.bray <-  ps %>%
   scale_colour_manual(values = c("#FB4F14","#002244", "")) +
   scale_shape_manual(values=good.shapes)
 
+# Run perMANOVA model
+ps.perm <- ps %>%
+  tax_filter(min_prevalence = 0.1, tax_level = "Genus") %>% #Filter for at least 10 observations per Genus (Rocca 2022)
+  dist_calc(dist = "bray") %>%
+  ord_calc(method = "PCoA") %>%
+  dist_permanova(seed = 1,
+                 variables = c("Time", "soilInCaClpH", "soilTemp", "sampleTiming", "fire"),
+                 n_processes = 1,
+                 n_perms = 10000)
+
+ps.perm %>% perm_get()
+
 # Generate Secondary repeat figure to pull legend from
 ps.bray.legend <-  ps %>%
   tax_filter(min_prevalence = 0.1, tax_level = "Genus") %>% #Filter for at least 10 observations per Genus (Rocca 2022)
@@ -385,25 +404,45 @@ Fig3B <- ps.bray +
 ggsave(filename= paste0(getwd(), "/Figures/Figure3B.pdf"), 
        plot = Fig3B, width = 180, height = 180, units=c("mm"), dpi=600)
 
-# Get PCoA MDS Figure
-ps.pcoa <- ps %>%
-  tax_filter(min_prevalence = 0.1, tax_level = "Genus") %>%
+# Figure SXX. MDA plot of Bray-Curtis Distance for Burn Only
+# Color by Pre/Post Burn, Shape by Plot ID
+ps.burned <- subset_samples(ps, fire = "Burned")
+ps.burn <-  ps.burned %>%
+  tax_filter(min_prevalence = 0.1, tax_level = "Genus") %>% #Filter for at least 10 observations per Genus (Rocca 2022)
   dist_calc(dist = "bray") %>%
   ord_calc(method = "PCoA") %>%
-  ord_get() %>%
-  phyloseq::plot_scree() +
+  ord_plot(color = "Time", shape = "plotID.x", size = 2, alpha = 1,
+           show.legend = TRUE) +
+  scale_colour_manual(values = c("#FB4F14","#002244", "")) +
+  scale_shape_manual(values=good.shapes)
+
+# PERMANOVA Analysis on the effect of Fire
+ps.permanova <-  ps.burned %>%
+  tax_filter(min_prevalence = 0.1, tax_level = "Genus") %>% #Filter for at least 10 observations per Genus (Rocca 2022)
+  dist_calc(dist = "bray") %>%
+  ord_calc(method = "PCoA") %>%
+  dist_permanova(seed = 1,
+                   variables = c("Time", "soilInCaClpH", "soilTemp", "sampleTiming"),
+                   n_processes = 1,
+                   n_perms = 10000)
+  
+ps.permanova %>% perm_get()
+
+# Generate Figure
+FigSXX <- ps.burn +
   theme(axis.text=element_text(size=8),
         axis.title=element_blank(),
         axis.text.x = element_blank(),
         axis.ticks = element_blank(),
         legend.text=element_text(size=8)) +
   theme_cowplot(12) +
-  xlab("Axis") +
-  ylab("Eigenvalue")
+  labs(color='Fire Status', shape = "Plot") + 
+  ggside::geom_xsidedensity(aes(fill = Time), alpha = 0.5, show.legend = FALSE) +
+  ggside::geom_ysidedensity(aes(fill = Time), alpha = 0.5, show.legend = FALSE) +
+  ggside::theme_ggside_void()
 
-ggsave(filename= paste0(getwd(), "/Figures/FigureS2.pdf"), 
-       plot = ps.pcoa, width = 180, height = 90, units=c("mm"), dpi=600)
-
+ggsave(filename= paste0(getwd(), "/Figures/FigureBrayBurn.pdf"), 
+       plot = FigSXX, width = 180, height = 180, units=c("mm"), dpi=600)
 
 # Figure 3C. RDA Plot (Redundancy Analysis)
 ps.weighted <- ps %>% #Weight sites by scaling and centering
@@ -473,6 +512,41 @@ Figure3 <- plot_grid(Fig3A, Figure.Tmp.2, ncol = 1, align = "v", axis = "tb", la
 ggsave(filename= paste0(getwd(),"/Figures/Figure3.pdf"), 
        plot = Figure3, width = 180, height = 240, units=c("mm"), dpi=600)
 
+# Unifrac Distance Supplementary Figure
+# Root Tree
+ps.rooted <- root_phyloseq_tree(ps.burned)
+
+#Unifrac Distance plot for Beta-Diversity
+unifrac <- ps.rooted %>%
+  tax_transform("identity", rank = "unique") %>%
+  dist_calc("gunifrac", gunifrac_alpha = 0.5)
+
+unifrac.plot <- unifrac %>%
+  ord_calc(method = "PCoA") %>%
+  ord_plot(color = "Time", shape = "plotID.x", size = 2, alpha = 1) +
+  scale_colour_manual(values = c("#FB4F14","#002244", "")) +
+  scale_shape_manual(values=good.shapes)
+
+unifrac.plot <- unifrac.plot +
+  theme(axis.text=element_text(size=8),
+        axis.title=element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks = element_blank(),
+        legend.text=element_text(size=8)) +
+  theme_cowplot(12) +
+  labs(color='Fire Status', shape = "Site") +
+  ggside::geom_xsidedensity(aes(fill = Time), alpha = 0.5, show.legend = FALSE) +
+  ggside::geom_ysidedensity(aes(fill = Time), alpha = 0.5, show.legend = FALSE) +
+  ggside::theme_ggside_void()
+
+ggsave(filename= paste0(getwd(), "/Figures/FigureUnifrac.pdf"),
+       plot = unifrac.plot, width = 180, height = 180, units=c("mm"), dpi=600)
+
+unifrac.out <- unifrac %>%
+  ord_calc(method = "PCoA")
+
+print(ord_get(unifrac.out))
+
 # Figure 4 (Phylogenetic Tree Color Coded by Indicator Species Analysis)
 # If the site classification vector (environmental data) is obtained independently of species data, 
 # the significance of statistical tests carried out on the indicator species will be meaningful. 
@@ -498,6 +572,55 @@ ps.ven.reduced <- as.data.frame(ps.ven.reduced)
 ps.ven.reduced$Time <- as.factor(ps.ven.reduced$Time)
 
 ps.ven.reduced <- ps.ven.reduced[,-1] #Eliminate column that is only rowID
+
+#Measure Turnover for Figure 3 Statistics
+#Burned Plots
+ps.beta.full <- ps.env[,c("plotID.x","fire","year")]
+reduced.beta <- which(ps.ven.full[,"fire"] == "Burned")
+ps.beta.reduced <- ps.beta.full[reduced.beta,] #Burned Plots, both time points
+ps.beta.matrix.reduced <- ps.matrix[reduced.beta,]
+ps.beta.reduced <- ps.beta.reduced[,-2]
+
+ps.beta <- as.data.frame(cbind(ps.beta.reduced, ps.beta.matrix.reduced))
+beta.long <- melt(ps.beta, id.vars = c("plotID.x", "year"))
+beta.long$value <- as.numeric(beta.long$value)
+beta.agg <- aggregate(value~year+variable+plotID.x, beta.long, sum)
+beta.agg$year <- as.numeric(beta.agg$year)
+ps.turnover.burned <- turnover(beta.agg, 
+                        time.var = "year", 
+                        species.var = "variable", 
+                        abundance.var = "value", 
+                        replicate.var = "plotID.x", 
+                        metric = "total")
+
+#Unburned Plots
+ps.beta.full <- ps.env[,c("plotID.x","fire","year")]
+reduced.beta <- which(ps.ven.full[,"fire"] == "Unburned")
+ps.beta.reduced <- ps.beta.full[reduced.beta,] #Burned Plots, both time points
+ps.beta.matrix.reduced <- ps.matrix[reduced.beta,]
+ps.beta.reduced <- ps.beta.reduced[,-2]
+
+ps.beta <- as.data.frame(cbind(ps.beta.reduced, ps.beta.matrix.reduced))
+beta.long <- melt(ps.beta, id.vars = c("plotID.x", "year"))
+beta.long$value <- as.numeric(beta.long$value)
+beta.agg <- aggregate(value~year+variable+plotID.x, beta.long, sum)
+beta.agg$year <- as.numeric(beta.agg$year)
+ps.turnover.unburned <- turnover(beta.agg, 
+                               time.var = "year", 
+                               species.var = "variable", 
+                               abundance.var = "value", 
+                               replicate.var = "plotID.x", 
+                               metric = "total")
+# Summary Tables
+print(ps.turnover.burned)
+print(ps.turnover.unburned)
+
+#Calculate t-test on turnover
+turnover.test <- t.test(x = ps.turnover.unburned$total, y = ps.turnover.burned$total,
+                             alternative = c("less"),
+                             mu = 0, paired = FALSE, exact = NULL, correct = FALSE,
+                             conf.int = FALSE, conf.level = 0.95)
+print(turnover.test)
 
 #Indic Species Analysis for Genus Level
 set.seed(811)
@@ -709,6 +832,15 @@ for(i in 1:nrow(tree.data)){
   }
 }
 
+# Reduce for a simpler Supplemental Table 5
+response.data <- tree.data[,-9]
+response.data <- response.data[response.data$response != "Burn (0)",]
+response.data <- response.data[,-1]
+response.data <- response.data[,-1]
+
+# Export Table of Supplemental Table 5
+xtable(response.data, type = "latex", file = paste0(getwd(), "/Tables/SupplementalTable5.tex"))
+
 #Add SuperPhylum Column to phyloseq object
 ps.taxa <- tax_names2rank(ps.taxa, colname = "SuperPhylum")
 
@@ -896,8 +1028,15 @@ pn <- ps.weighted %>%
 print(pn)
 
 # Heatmap
-# Correlation Heatmap
-cor_heatmap(ps.phylum)
+# Correlation Heatmap for fire using pre- and post- burn data
+# Need to convert to Numeric
+ps.weighted@sam_data$Fire <- as.numeric(ps.weighted@sam_data$Fire)
+ps.weighted@sam_data$Fall <- as.numeric(ps.weighted@sam_data$Fall)
+ps.weighted@sam_data$Spring <- as.numeric(ps.weighted@sam_data$Spring)
+ps.weighted@sam_data$Summer <- as.numeric(ps.weighted@sam_data$Summer)
+
+ps.weighted <- ps_drop_incomplete(ps.corr, vars = "pH", verbose = TRUE)
+corr <- cor_heatmap(ps.weighted, vars = c("pH", "Fire", "Spring", "Summer", "Fall"))
 
 # Composition Heatmap
 comp <- comp_heatmap(ps.phylum,  sample_anno = sampleAnnotation(
@@ -948,4 +1087,107 @@ ggsave(filename= paste0(getwd(),"/Figures/FigureS3.pdf"),
        plot = op, width = 180, height = 240, units=c("mm"), dpi=600) 
 
 # PhyloD
+# Reduce to positive/negative as one repsonse, and neutral as another response
+# Phylogenetic Signal to any response
+phyloD.response <- tr.response[,-2]
+for(i in 1:nrow(phyloD.response)){
+  if(phyloD.response$group[i] == "Burn (0)"){
+    phyloD.response$group[i] <- 0
+  }
+  if(phyloD.response$group[i] == "Burn (-)"){
+    phyloD.response$group[i] <- 1
+  }
+  if(phyloD.response$group[i] == "Burn (+)"){
+    phyloD.response$group[i] <- 1
+  }
+}
+
+phyloD.object <- comparative.data(tr, phyloD.response, id)
+phyloD.test <- phylo.d(phyloD.object, binvar=group)
+
+print(phyloD.test)
+plot(phyloD.test)
+
+# Phylogenetic Signal to positive response
+phyloD.response.p <- tr.response[,-2]
+for(i in 1:nrow(phyloD.response.p)){
+  if(phyloD.response.p$group[i] == "Burn (0)"){
+    phyloD.response.p$group[i] <- 0
+  }
+  if(phyloD.response.p$group[i] == "Burn (-)"){
+    phyloD.response.p$group[i] <- 0
+  }
+  if(phyloD.response.p$group[i] == "Burn (+)"){
+    phyloD.response.p$group[i] <- 1
+  }
+}
+
+phyloD.object.p <- comparative.data(tr, phyloD.response.p, id)
+phyloD.test.p <- phylo.d(phyloD.object.p, binvar=group)
+
+print(phyloD.test.p)
+plot(phyloD.test.p)
+
+# Phylogenetic Signal to negative response
+phyloD.response.n <- tr.response[,-2]
+for(i in 1:nrow(phyloD.response.n)){
+  if(phyloD.response.n$group[i] == "Burn (0)"){
+    phyloD.response.n$group[i] <- 0
+  }
+  if(phyloD.response.n$group[i] == "Burn (-)"){
+    phyloD.response.n$group[i] <- 1
+  }
+  if(phyloD.response.n$group[i] == "Burn (+)"){
+    phyloD.response.n$group[i] <- 0
+  }
+}
+
+phyloD.object.n <- comparative.data(tr, phyloD.response.n, id)
+phyloD.test.n <- phylo.d(phyloD.object.n, binvar=group)
+
+print(phyloD.test.n)
+plot(phyloD.test.n)
+
+# Calculate Bray-Curtis Distance over time
+
+# Calculate Turnover over time
+# Burned Plots
+turnover.beta.full <- ps.env[,c("plotID.x","fire","year", "sampleTiming")]
+reduced.turnover <- which(turnover.beta.full[,"fire"] == "Burned" & turnover.beta.full[,"year"] == "2017")
+turnover.beta.reduced <- turnover.beta.full[reduced.turnover,] #Burned Plots, both time points
+turnover.beta.matrix.reduced <- ps.matrix[reduced.turnover,]
+turnover.beta.reduced <- turnover.beta.reduced[,-2]
+
+ps.beta <- as.data.frame(cbind(turnover.beta.reduced, turnover.beta.matrix.reduced))
+beta.long <- melt(ps.beta, id.vars = c("plotID.x", "year", "sampleTiming"))
+beta.long$value <- as.numeric(beta.long$value)
+beta.long[beta.long$sampleTiming == "winterSpringTransition", 3] <- 1
+beta.long[beta.long$sampleTiming == "peakGreenness", 3] <- 2
+beta.long[beta.long$sampleTiming == "fallWinterTransition", 3] <- 3
+beta.long <- beta.long[,-2]
+beta.long$value <- as.numeric(beta.long$value)
+beta.agg <- aggregate(value~sampleTiming+variable, beta.long, sum)
+beta.agg$sampleTiming <- as.numeric(beta.agg$sampleTiming)
+ps.turnover.time <- turnover(beta.agg, 
+                                 time.var = "sampleTiming", 
+                                 species.var = "variable", 
+                                 abundance.var = "value", 
+                                 metric = "total")
+
+ps.turnover.app <- turnover(beta.agg, 
+                             time.var = "sampleTiming", 
+                             species.var = "variable", 
+                             abundance.var = "value", 
+                             metric = "appearance")
+
+ps.turnover.dipp <- turnover(beta.agg, 
+                             time.var = "sampleTiming", 
+                             species.var = "variable", 
+                             abundance.var = "value", 
+                             metric = "disappearance")
+
+# Summary Tables
+print(ps.turnover.time)
+print(ps.turnover.app)
+print(ps.turnover.dipp)
 

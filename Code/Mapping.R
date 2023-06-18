@@ -9,7 +9,6 @@ library(basemaps)
 library(gridExtra)
 
 # Load in Fire Perimeter from Great Smoky Mountains National Park (previouly downloaded and provided in GitHub repo)
-fire <- sf::st_read(paste0(getwd(),"/data/GRSM_CT_FIRE_PERIMETER/GRSM_CT_FIRE_FIRE_POLYGON.shp"), package = "sf")
 perimeter <- readOGR( 
   dsn = paste0(getwd(),"/data/GRSM_CT_FIRE_PERIMETER/"), 
   layer = "GRSM_CT_FIRE_FIRE_POLYGON",
@@ -30,7 +29,18 @@ plots <- readOGR(
 )
 
 #Load in Burn Severity (previouly downloaded and provided in GitHub repo)
-burn <- read.csv(paste0(getwd(),"/data/GRSM_CT_FIRE_SOIL_BURN_SEVERITY.csv"))
+#burn <- read.csv(paste0(getwd(),"/data/GRSM_CT_FIRE_SOIL_BURN_SEVERITY.csv"))
+severity <- readOGR( 
+  dsn = paste0(getwd(),"/data/GRSM_CT_FIRE_SOIL_BURN_SEVERITY/"), 
+  layer = "GRSM_CHIMNEY_TOPS_FIRE_SOIL_BURN_SEVERITY",
+  verbose = FALSE
+)
+
+st_crs(severity) #Check coordinate reference system
+proj4string(severity) <- CRS("+init=epsg:26917") #Project to new CRS
+severity <- spTransform(severity, CRS("+proj=longlat +datum=NAD83 +init=epsg:26917")) #Set CRS
+
+burn.severity <- st_as_sf(severity) #Create seperate shapefile set
 
 #Subset to plots of interest
 keep <- c("1", "2", "3", "7", "16", "55", "58", "59", "60")
@@ -58,9 +68,14 @@ p <- ggmap(tn_map) +
 ggsave(filename= paste0(getwd(), "/Figures/Figure1A.pdf"), 
        plot = p, width = 180, height = 180, units=c("mm"), dpi=600) 
 
-# # Try to create call out later
-# q <- ggplot() +
-#   borders(database = "state", reg = "tennessee") + 
-#   geom_rect(xmin = -83.7, xmax = -83.2, ymin = 35.5, ymax = 35.9, 
-#                                       fill = NA, colour = "black", size = 1.5) +
-#   theme_cowplot()
+# Supplemental Figure with Burn Severity
+p <- ggmap(tn_map) +
+  geom_sf(data = burn.severity, aes(fill = burn.severity$Severity), inherit.aes = FALSE) +
+  geom_sf(data = plots, color = c("#002244", "#002244", "#FB4F14", "#FB4F14",
+                                  "#002244", "#FB4F14", "#FB4F14", 
+                                  "#FB4F14", "#FB4F14"), inherit.aes = FALSE) +
+  theme_cowplot()
+
+#Save Plot
+ggsave(filename= paste0(getwd(), "/Figures/FigureS5.pdf"), 
+       plot = p, width = 180, height = 180, units=c("mm"), dpi=600) 
