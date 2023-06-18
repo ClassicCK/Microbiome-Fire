@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?><metadata>
+    <idinfo>
+        <descript>
+            <abstract>Soil burn severity dataset created from the BARC image (v2) and field observations by the BAER Team.Non Burn (1-19)Low Severity (20-124 + shadow)Mod Severity (125-199)High Severity (200-254). 
+The affect of a fire on ground surface characteristics, including char depth, organic matter loss, altered color and structure, and reduced infiltration. The classification of post-fire soil condition is based on fire-induced changes in physical and biological soil properties. During post-fire assessments, there has been an intentionaleffort to use the term “soil burn severity” to differentiate post-fire soil properties from  fire effects on vegetation (such as tree mortality) and/or general fire effects on long-term ecosystem health. </abstract>
+            <purpose>Great Smoky Mountains National Park Soil Burn Severity Resulting from Chimney Tops 2 Fire</purpose>
+        </descript>
+        <keywords>
+            <theme>
+                <themekt>None</themekt>
+                <themekey>BAER</themekey>
+                <themekey>Chimney Tops 2 Fire</themekey>
+                <themekey>Cobbly Nob Fire</themekey>
+                <themekey>Fire</themekey>
+                <themekey>Wildland Fire</themekey>
+                <themekey>GRSM</themekey>
+                <themekey>Great Smoky Mountains National Park</themekey>
+                <themekey>NPS</themekey>
+                <themekey>National Park Service</themekey>
+                <themekey>Soils</themekey>
+                <themekey>Burn Severity</themekey>
+                <themekey>Chimney Tops 2 Fire</themekey>
+                <themekey>Cobbly Nob Fire</themekey>
+            </theme>
+        </keywords>
+        <accconst>None</accconst>
+        <useconst>The National Park Service shall not be held liable for improper or incorrect use of the data described and/or contained herein. These data and related graphics (i.e. GIF or JPG format files) are not legal documents and are not intended to be used as such. The information contained in these data is dynamic and may change over time. The data are not better than the original sources from which they were derived. It is the responsibility of the data user to use the data appropriately and consistent within the limitations of geospatial data in general and these data in particular. The related graphics are intended to aid the data user in acquiring relevant data; it is not appropriate to use the related graphics as data. The National Park Service gives no warranty, expressed or implied, as to the accuracy, reliability, or completeness of these data. It is strongly recommended that these data are directly acquired from an NPS server and not indirectly through other sources which may have changed the data in some way. Although these data have been processed successfully on computer systems at the National Park Service, no warranty expressed or implied is made regarding the utility of the data on other systems for general or scientific purposes, nor shall the act of distribution constitute any such warranty. This disclaimer applies both to individual use of the data and aggregate use with other data.</useconst>
+        <datacred>BAER Team; Great Smoky Mountains National  Park</datacred>
+    </idinfo>
+    <metainfo>
+        <metstdn>FGDC Content Standard for Digital Geospatial Metadata</metstdn>
+        <metstdv>FGDC-STD-001-1998</metstdv>
+        <mettc>local time</mettc>
+    </metainfo>
+</metadata>
